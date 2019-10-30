@@ -98,22 +98,27 @@ def write_piano_roll_to_midi(piano_roll, filename, program_num=0, is_drum=False,
     midi.write(filename)
 
 
-def write_piano_rolls_to_midi(piano_rolls, program_nums=None, is_drum=None, filename='test.mid', velocity=100,
+
+
+def write_piano_rolls_to_midi(piano_rolls, tracks_index,program_nums=None, is_drum=None, filename='test.mid', velocity=100,
                               tempo=120.0, beat_resolution=24):
-    print("qqq")
-    if len(piano_rolls) != len(program_nums) or len(piano_rolls) != len(is_drum):
-        print("Error: piano_rolls and program_nums have different sizes...")
-        return False
-    if not program_nums:
-        program_nums = [0, 0, 0]
-    if not is_drum:
-        is_drum = [False, False, False]
+    # if len(piano_rolls) != len(program_nums) or len(piano_rolls) != len(is_drum):
+    #     print("Error: piano_rolls and program_nums have different sizes...")
+    #     return False
+    # if not program_nums:
+    #     program_nums = [0, 0, 0]
+    # if not is_drum:
+    #     is_drum = [False, False, False]
+
+    print("fffff")
     # Create a PrettyMIDI object
+    print(tracks_index.shape)
+    print(tracks_index)
     midi = pretty_midi.PrettyMIDI(initial_tempo=tempo)
     # Iterate through all the input instruments
-    for idx in range(len(piano_rolls)):
+    for idx in range(5):
         # Create an Instrument object
-        instrument = pretty_midi.Instrument(program=program_nums[idx], is_drum=is_drum[idx])
+        instrument = pretty_midi.Instrument(program=(int)(tracks_index[idx,0]), is_drum=(int)(tracks_index[idx,1]))
         # Set the piano roll to the Instrument object
         set_piano_roll_to_instrument(piano_rolls[idx], instrument, velocity, tempo, beat_resolution)
         # Add the instrument to the PrettyMIDI object
