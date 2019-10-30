@@ -11,7 +11,7 @@ import  tensorflow as tf
 ROOT_PATH = '/home/liumingzhi/projectfile/midi-interface/filedir'
 converter_path = os.path.join(ROOT_PATH, 'MIDI/pop/pop_test/converter')
 cleaner_path = os.path.join(ROOT_PATH, 'MIDI/pop/pop_test/cleaner')
-
+#ultimately finish
 
 def make_sure_path_exists(path):
     """Create all intermediate-level directories if the given path does not
