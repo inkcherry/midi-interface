@@ -8,10 +8,14 @@ import shutil
 import numpy as np
 import write_midi
 import  tensorflow as tf
-ROOT_PATH = '/home/liumingzhi/projectfile/midi-interface/filedir'
+#config
+ROOT_PATH = '/home/liumingzhi/inkcpro/midilib/lib'
 converter_path = os.path.join(ROOT_PATH, 'MIDI/pop/pop_test/converter')
 cleaner_path = os.path.join(ROOT_PATH, 'MIDI/pop/pop_test/cleaner')
+bar_length=32
 
+
+#
 
 def make_sure_path_exists(path):
     """Create all intermediate-level directories if the given path does not
@@ -73,25 +77,14 @@ def midi_filter(midi_info):
 def get_merged(multitrack):
     """Return a `pypianoroll.Multitrack` instance with piano-rolls merged to
     five tracks (Bass, Drums, Guitar, Piano and Strings)"""
-    category_list = {'Drums': [], 'Piano': [], 'Chromatic Percussion': [], 'Organ': [], 'Guitar': [], 'Bass': [],
-                     'Strings': [], 'Ensemble': [],
-                     'Brass': [], 'Reed': [], 'Pipe': [], 'Synth Lead': [], 'Synth Pad': [],
-                     'Synth Effects': [], 'Ethnic': [], 'Percussive': [], 'Sound Effects': []}
-
-    program_dict = {'Drums': 0, 'Piano': 0, 'Chromatic Percussion': 8, 'Organ': 16, 'Guitar': 24, 'Bass': 32,
-                    'Strings': 40,
-                    'Ensemble': 48, 'Brass': 56, 'Reed': 64, 'Pipe': 72, 'Synth Lead': 80, 'Synth Pad': 88,
-                    'Synth Effects': 96,
-                    'Ethnic': 104, 'Percussive': 112, 'Sound Effects': 120
-                    }
+    category_list = {'Piano': []}
+    program_dict = {'Piano': 0}
 
     for idx, track in enumerate(multitrack.tracks):
-        if track.is_drum:
-            category_list['Drums'].append(idx)
-        else:
-            print("ffsf")
-            print(track.program//8+1)
-            category_list[track.program//8 + 1].append(idx)
+
+        if track.program//8 == 0:
+            category_list['Piano'].append(idx)
+
 
     tracks = []
 
@@ -125,21 +118,21 @@ def converter(filepath):
     except:
         return None
 def get_bar_piano_roll(piano_roll,last_bar_mode='remove'):
-    if int(piano_roll.shape[0] % 64) is not 0:
+    if int(piano_roll.shape[0] % bar_length) is not 0:
         if last_bar_mode == 'fill':
-            piano_roll = np.concatenate((piano_roll, np.zeros((64 - piano_roll.shape[0] % 64, 128))), axis=0)
+            piano_roll = np.concatenate((piano_roll, np.zeros((bar_length - piano_roll.shape[0] % bar_length, 128))), axis=0)
         elif last_bar_mode == 'remove':
-            piano_roll = np.delete(piano_roll,  np.s_[-int(piano_roll.shape[0] % 64):], axis=0)
-    piano_roll = piano_roll.reshape(-1, 64, 128)
+            piano_roll = np.delete(piano_roll,  np.s_[-int(piano_roll.shape[0] % bar_length):], axis=0)
+    piano_roll = piano_roll.reshape(-1, bar_length, 128)
     return piano_roll
 
 
 def save_midis(bars, file_path, tempo=80.0):
     padded_bars = np.concatenate((np.zeros((bars.shape[0], bars.shape[1], 24, bars.shape[3])), bars,
                                   np.zeros((bars.shape[0], bars.shape[1], 20, bars.shape[3]))), axis=2)
-    pause = np.zeros((bars.shape[0], 64, 128, bars.shape[3]))
+    pause = np.zeros((bars.shape[0], bar_length, 128, bars.shape[3]))
     images_with_pause = padded_bars
-    images_with_pause = images_with_pause.reshape(-1, 64, padded_bars.shape[2], padded_bars.shape[3])
+    images_with_pause = images_with_pause.reshape(-1, bar_length, padded_bars.shape[2], padded_bars.shape[3])
     images_with_pause_list = []
     for ch_idx in range(padded_bars.shape[3]):
         images_with_pause_list.append(images_with_pause[:, :, :, ch_idx].reshape(images_with_pause.shape[0],
@@ -152,15 +145,15 @@ def save_midis(bars, file_path, tempo=80.0):
                                          tempo=tempo, beat_resolution=4)
 
 def save_multitrack_midis(multitrack_with_bars,tracks_index,file_path,tempo=80.0):
-    multi_images_with_pause=np.zeros((5, 32, 64, 128, 1))
+    multi_images_with_pause=np.zeros((5, 32, bar_length, 128, 1))
     for i in range (5):
         bars=multitrack_with_bars[i]
-        print("bars shape",bars.shape)
+        # print("bars shape",bars.shape)
         padded_bars = np.concatenate((np.zeros((bars.shape[0], bars.shape[1], 24, bars.shape[3])), bars,
                                       np.zeros((bars.shape[0], bars.shape[1], 20, bars.shape[3]))), axis=2)
-        pause = np.zeros((bars.shape[0], 64, 128, bars.shape[3]))
+        pause = np.zeros((bars.shape[0], bar_length, 128, bars.shape[3]))
         images_with_pause = padded_bars
-        images_with_pause = images_with_pause.reshape(-1, 64, padded_bars.shape[2], padded_bars.shape[3])
+        images_with_pause = images_with_pause.reshape(-1, bar_length, padded_bars.shape[2], padded_bars.shape[3])
         images_with_pause_list = []
         for ch_idx in range(padded_bars.shape[3]):
             images_with_pause_list.append(images_with_pause[:, :, :, ch_idx].reshape(images_with_pause.shape[0],
@@ -178,49 +171,35 @@ def save_multitrack_midis(multitrack_with_bars,tracks_index,file_path,tempo=80.0
 
 
 
-##test---------------------------------------------
-# filepath="../filedir/example.mid"
-# midi_name = os.path.splitext(os.path.basename(filepath))[0]
-# multitrack = Multitrack(beat_resolution=24, name=midi_name)
-#
-# pm = pretty_midi.PrettyMIDI(filepath)
-# midi_info = get_midi_info(pm)
-# multitrack.parse_pretty_midi(pm)
-# merged = get_merged(multitrack)
-#
-# make_sure_path_exists(converter_path)
-# merged.save(os.path.join(converter_path, midi_name + '.npz'))
-##test-----------------------------------------------
 
 
 
-# ROOT_PATH = '/home/liumingzhi/projectfile/midi-interface/filedir'
-
-# multitrack = Multitrack(beat_resolution=4, name='example')
-
+# (piano_roll, filename, 0, is_drum=False, velocity=100,
+#                              tempo=120.0, beat_resolution=16):
 
 
-multitrack = Multitrack(beat_resolution=4, name='example')
-x = pretty_midi.PrettyMIDI('example.mid')
+
+
+
+multitrack = Multitrack(beat_resolution=4, name='exghample')
+x = pretty_midi.PrettyMIDI('monophonicdata/monomelody1.mid')
 multitrack.parse_pretty_midi(x)
 tracks,_=get_merged(multitrack)
 
 
 
 
-# pr = get_bar_piano_roll(merged)
+
+# tracks_index=np.zeros([5,2])  #program  is_drum
+# index = 0
+# for key in tracks:
+#     tracks_index[index,0]=key.program
+#     tracks_index[index,1]=key.is_drum
+#     index+=1
 
 
 
-tracks_index=np.zeros([5,2])  #program  is_drum
-index = 0
-for key in tracks:
-    tracks_index[index,0]=key.program
-    tracks_index[index,1]=key.is_drum
-    index+=1
-
-
-print (tracks_index)
+# print (tracks_index)
 
 
 def get_initial():
@@ -229,12 +208,11 @@ def get_initial():
         pr_clip = pr[:, :, 24:108]
         if int(pr_clip.shape[0] % 4) != 0:
             pr_clip = np.delete(pr_clip, np.s_[-int(pr_clip.shape[0] % 4):], axis=0)
-        pr_re = pr_clip.reshape(-1, 64, 84, 1)
+        pr_re = pr_clip.reshape(-1, bar_length, 84, 1)
         print(pr_re.shape)
         dims=pr_re.shape
         merges=pr_re
         return dims,merges
-
 
 dims,merges=get_initial()
 
@@ -248,80 +226,17 @@ for key in tracks:
         pr_clip = pr[:, :, 24:108]
         if int(pr_clip.shape[0] % 4) != 0:
             pr_clip = np.delete(pr_clip, np.s_[-int(pr_clip.shape[0] % 4):], axis=0)
-        pr_re = pr_clip.reshape(-1, 64, 84, 1)
+        pr_re = pr_clip.reshape(-1, bar_length, 84, 1)
         merges=np.append(merges,pr_re)
 
 
-print(len(tracks))
-exit()
-merges=merges.reshape(len(tracks),dims[0],dims[1],dims[2],dims[3])
+merges=merges.reshape(dims[0],dims[1],dims[2],dims[3])
+print(merges.shape)
 
-save_multitrack_midis(merges,tracks_index,"/home/liumingzhi/inkcpro/midilib/real5max.mid")
-
-
-
-# print(len(tracks),dims[0],dims[1])
-# print(merges.shape)
-#
-# for i in range(merges.shape[0]):
-
-
-# id=0
-# for key in tracks:
-#     if id ==0:
-#         id+=1
-#     else:
-#         merges.append(key.pianoroll)
-#
-# merges.reshape(len(tracks),dims[0],dims[1])
-
+write_midi.save_singletrck_midis(merges,'qws.mid')
 
 
 print(tf.shape(merges))
-# for key in merges:
-#     print(merges[key].pianoroll)
-# print(tracks)
 
-
-
-# #test code    one track
-# multitrack = Multitrack(beat_resolution=4, name='example')
-# x = pretty_midi.PrettyMIDI('example.mid')
-# multitrack.parse_pretty_midi(x)
-#
-# category_list = {'Piano': [], 'Drums': []}
-# program_dict = {'Piano': 0, 'Drums': 0}
-#
-# for idx, track in enumerate(multitrack.tracks):
-#     if track.is_drum:
-#         category_list['Drums'].append(idx)
-#     else:
-#         category_list['Piano'].append(idx)
-# tracks = []
-#
-# print("333")
-# print(category_list['Piano'])
-# print("333")
-# print(category_list['Drums'])
-# print("333")
-#
-# merged = multitrack[category_list['Piano']].get_merged_pianoroll()
-#
-#
-# print(merged.shape)
-# pr = get_bar_piano_roll(merged)
-# print(pr.shape)
-# pr_clip = pr[:, :, 24:108]
-# print(pr.shape)
-# print(pr_clip.shape)
-# if int(pr_clip.shape[0] % 4) != 0:
-#     pr_clip = np.delete(pr_clip, np.s_[-int(pr_clip.shape[0] % 4):], axis=0)
-# pr_re = pr_clip.reshape(-1, 64, 84, 1)
-# print(pr_re.shape)
-#
-#
-#
-# print("fsdfa")
-# #test code    one track
 
 

@@ -249,7 +249,7 @@ for key in tracks:
 
 merges=merges.reshape(len(tracks),dims[0],dims[1],dims[2],dims[3])
 
-save_multitrack_midis(merges,tracks_index,"/home/liumingzhi/projectfile/midi-interface/real5max.mid")
+save_multitrack_midis(merges,tracks_index,"/home/liumingzhi/inkcpro/midilib/real5max.mid")
 
 
 
