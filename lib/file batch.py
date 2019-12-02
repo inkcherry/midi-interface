@@ -31,7 +31,20 @@ for i in range(len(file_list)):
 
 print("concat_mat shape",concat_mat.shape)
 
+np.save("10midi.npy",concat_mat)
 
+npar=np.load("10midi.npy")
+
+print("np ar shape",npar.shape)
+
+
+
+
+
+
+mmat_2_mmidi(npar,"real_midi.mid")
+
+print("end 10 midi")
 exit()
 # for root, dirs, files in os.walk(filepath):
 

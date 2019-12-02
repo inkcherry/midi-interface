@@ -68,9 +68,9 @@ def get_bar_piano_roll(piano_roll,last_bar_mode='remove'):
 
 
 
-def p_2_mmat(filename):
-    x = pretty_midi.PrettyMIDI('chorus_nokey.mid')
-    multitrack = Multitrack(beat_resolution=4, name='test')
+def p_2_mmat(filename,beat_resolution=4):
+    x = pretty_midi.PrettyMIDI(filename)
+    multitrack = Multitrack(beat_resolution=beat_resolution, name='test')
     multitrack.parse_pretty_midi(x)
     melody_track = []
     melody_track.append(Track(multitrack.tracks[0].get_pianoroll_copy(), 0, False, 'Piano'))
@@ -84,7 +84,7 @@ def p_2_mmat(filename):
 
 
 def mmat_2_mmidi(track,filename):
-    write_midi.save_singletrck_midis(track,"filename")
+    write_midi.save_singletrck_midis(track,filename,tempo=120)
 
 
 
