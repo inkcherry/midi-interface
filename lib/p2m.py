@@ -68,7 +68,7 @@ def get_bar_piano_roll(piano_roll,last_bar_mode='remove'):
 
 
 
-def p_2_mmat(filename,beat_resolution=4):
+def p_2_mmat(filename,tempo=120,beat_resolution=24):
     x = pretty_midi.PrettyMIDI(filename)
     multitrack = Multitrack(beat_resolution=beat_resolution, name='test')
     multitrack.parse_pretty_midi(x)
@@ -83,8 +83,8 @@ def p_2_mmat(filename,beat_resolution=4):
     return track
 
 
-def mmat_2_mmidi(track,filename):
-    write_midi.save_singletrck_midis(track,filename,tempo=120)
+def mmat_2_mmidi(track,filename,tempo=120,beat_reselution=24):
+    write_midi.save_singletrck_midis(track,filename,tempo=120,beat_resolution=24)
 
 
 
