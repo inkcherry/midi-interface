@@ -4,6 +4,7 @@ import  numpy as np
 import  pretty_midi
 root_path = '/home/liumingzhi/inkcpro/midilib/lib'
 mididata_path = 'data1'
+beat_resolution=4
 from pypianoroll import Multitrack, Track
 
 file_list = [f for f in os.listdir(os.path.join(root_path, mididata_path))]
@@ -48,6 +49,11 @@ def get_midi_info(filepath):
         return None
 
 def  is_eligible_midi(midi_info):
+    #error file
+    if midi_info==None:
+        return False
+    #
+
     if midi_info['first_beat_time'] > 0.0:
         return False
     elif midi_info['num_time_signature_change'] > 1:
@@ -74,7 +80,7 @@ count=0
 concat_mat=[]
 for i in range(len(file_list)):
     cur_filename = os.path.join(root_path, mididata_path, file_list[i])
-    concat_mat = p_2_mmat(cur_filename)
+    concat_mat = p_2_mmat(cur_filename,beat_resolution=beat_resolution)
     break
 
 
@@ -88,7 +94,7 @@ for i in range(len(file_list)):
     cur_filename=os.path.join(root_path,mididata_path,file_list[i])
     cur_midi_info=get_midi_info(cur_filename)
     if(is_eligible_midi(cur_midi_info)):
-        cur_mmat = p_2_mmat(cur_filename)
+        cur_mmat = p_2_mmat(cur_filename,beat_resolution=beat_resolution)
         mat_for_judge=np.copy(cur_mmat)
         if(is_monophonic(mat_for_judge)):
         # ind = np.argpartition(onehotmat, -4)[-4:]
@@ -97,27 +103,16 @@ for i in range(len(file_list)):
         #end
             concat_mat=np.concatenate((concat_mat,cur_mmat),axis=0)
             count+=1
-    # if (count == 100):
+            # print(cur_filename)
+    # if (count == 2):
     #     break
-
-print ("eligible_midi number of all midifiles",count,"/",i)
+print ("eligible_midi number of all midifiles",count,"/",i+1)
 
 print("concat_mat shape",concat_mat.shape)
 
-np.save("eligiblemidii.npy",concat_mat)
+np.save("pixel4.npy",concat_mat)
 
 # npar=np.load("eligiblemidii.npy")
-#
 # print("np ar shape",npar.shape)
-
-
-
-
-
-
 # mmat_2_mmidi(npar,"real_midi.mid")
-
-
-
 # for root, dirs, files in os.walk(filepath):
-

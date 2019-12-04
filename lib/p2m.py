@@ -84,7 +84,7 @@ def p_2_mmat(filename,tempo=120,beat_resolution=24):
 
 
 def mmat_2_mmidi(track,filename,tempo=120,beat_reselution=24):
-    write_midi.save_singletrck_midis(track,filename,tempo=120,beat_resolution=24)
+    write_midi.save_singletrck_midis(track,filename,tempo=120,beat_resolution=beat_reselution)
 
 
 

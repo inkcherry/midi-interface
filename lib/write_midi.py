@@ -29,7 +29,8 @@ def save_singletrck_midis(bars, file_path, tempo=120.0, beat_resolution=24):
 def set_piano_roll_to_instrument(piano_roll, instrument, velocity=100, tempo=120.0, beat_resolution=24):
     # Calculate time per pixel
     tpp = 60.0 / tempo / float(beat_resolution)
-    threshold = 60.0 / tempo / 4
+    # threshold = 60.0 / tempo / 4
+    threshold = 0
     phrase_end_time = 60.0 / tempo * 4 * piano_roll.shape[0]
     # Create piano_roll_search that captures note onsets and offsets
     piano_roll = piano_roll.reshape((piano_roll.shape[0] * piano_roll.shape[1], piano_roll.shape[2]))
