@@ -41,7 +41,8 @@ def tes_t():
     f = d4onehot_to_real(m)
     d4 = real_to_d4onehot(f)
     d4_100 = d4 * 100
-
+    print(type(d4))
+    exit()
     # g=(d4==m)
     # for i in range (g.shape[0]):
     #     for j in range(g.shape[1]):
@@ -62,5 +63,5 @@ def tes_t():
     mmat_2_mmidi(m, "m.mid")
     mmat_2_mmidi(d4_100, "d4_100.mid")
 
-
+# tes_t()
 

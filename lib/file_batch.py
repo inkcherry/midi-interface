@@ -75,7 +75,7 @@ def is_monophonic(cur_mmat):
                 # is_polyphonic = 1
                 return False
     return True
-
+#repeat i ?
 count=0
 concat_mat=[]
 for i in range(len(file_list)):
